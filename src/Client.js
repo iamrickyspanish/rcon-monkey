@@ -21,13 +21,13 @@ class Deferred {
 
 module.exports = class Client {
   constructor(adapter, port, host) {
-    const { connectionProtocol } = adapter;
-    const connection = new RconConnection(connectionProtocol)
+    const connection = new RconConnection(adapter.connectionProtocol)
     connection.on(
       "receive",
       this.receive.bind(this)
     );
     Object.assign(this, {
+      adapter,
       port,
       host,
       connection,
