@@ -1,6 +1,6 @@
 const createRequest = (type, id, body) => {
   var size = Buffer.byteLength(body) + 14,
-    buffer = new Buffer(size);
+    buffer = new Buffer.alloc(size);
 
   buffer.writeInt32LE(size - 4, 0);
   buffer.writeInt32LE(id, 4);

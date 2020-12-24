@@ -22,8 +22,9 @@ class Deferred {
 module.exports = class Client {
   constructor(adapter, port, host) {
     const { connectionProtocol } = adapter;
-    const connection = new RconConnection(connectionProtocol).on(
-      "data",
+    const connection = new RconConnection(connectionProtocol)
+    connection.on(
+      "receive",
       this.receive.bind(this)
     );
     Object.assign(this, {
@@ -69,13 +70,11 @@ module.exports = class Client {
 
   async connect() {
     return new Promise((resolve, reject) => {
-      this.connection.on("connect", () => {
+      this.connection.once("connect", () => {
         resolve();
-        this.connection.off("connect");
       });
-      this.connection.on("error", () => {
+      this.connection.once("error", () => {
         reject();
-        this.connection.off("error");
       });
       this.connection.connect(this.port, this.host);
     });
