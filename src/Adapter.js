@@ -1,8 +1,15 @@
+const { TCP } = require("../Connection/protocols");
+
 module.exports = class Adapter {
-  constructor(protocol, serialize, parse) {
-    this.connectionProtocol = protocol;
-    this.serialize = serialize;
-    this.parse = parse;
-    Object.freeze(this);
-  }
+  
+  getProtocol() { return  TCP }
+
+  getAuthMessage(password) { return password }
+
+  processAuthResponse(response) { console.log("response:", response) }
+
+  serialize(message) { return message }
+  
+  parse(response) { return response }
+
 };
