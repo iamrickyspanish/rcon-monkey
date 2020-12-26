@@ -18,13 +18,15 @@ const RconConnection = require("./Connection");
 //   }
 // }
 
+rejectOnTimeout = (reject, time = 3000) =>
+  setTimeout(() => {
+    reject(new Error("Timeout"));
+  }, time);
+
 module.exports = class Client {
   constructor(adapter, port, host) {
-    const connection = new RconConnection(adapter.getProtocol())
-    connection.on(
-      "receive",
-      this.receive.bind(this)
-    );
+    const connection = new RconConnection(adapter.getProtocol());
+    // connection.on("receive", this.receive.bind(this));
     Object.assign(this, {
       adapter,
       port,
@@ -35,21 +37,23 @@ module.exports = class Client {
   }
 
   send(message) {
-    const _id = id || uuidv4();
-    const req = this.adapter.serialize(message)
+    // const _id = id || uuidv4();
+    const req = this.adapter.serialize(message);
     return new Promise((resolve, reject) => {
+      console.log("send before");
       this.connection.send(req);
+      console.log("send after");
+      rejectOnTimeout(reject);
 
       this.connection.once("error", (err) => {
-        reject(err)
-      })
+        reject(err);
+      });
 
       this.connection.once("receive", (res) => {
-        const result = this.adapter.parse(res)
-        resolve(result)
-      })
-
-    })
+        const result = this.adapter.parse(res);
+        resolve(result);
+      });
+    });
 
     // const req = createRequest(type, _id, body);
     // this.connection.send(req);
@@ -71,6 +75,7 @@ module.exports = class Client {
 
   async exec(message) {
     try {
+      console.log("exec");
       const res = await this.send(message);
       return res;
     } catch (err) {
@@ -80,12 +85,16 @@ module.exports = class Client {
 
   async connect() {
     return new Promise((resolve, reject) => {
+      rejectOnTimeout(reject);
       this.connection.once("connect", () => {
         resolve();
       });
+
       this.connection.once("error", () => {
+        console.log("error");
         reject();
       });
+      console.log("connect");
       this.connection.connect(this.port, this.host);
     });
   }

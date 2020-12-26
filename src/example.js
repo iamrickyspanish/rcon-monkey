@@ -1,7 +1,7 @@
 const RconClient = require("./Client");
-const goldSrcAdapter = require("./adapters/goldSrc");
+const GoldSrcAdapter = require("./adapters/goldSrc");
 
-const client = new RconClient(goldSrcAdapter, 27015, "frag.world");
+const client = new RconClient(new GoldSrcAdapter(), 27015, "frag.world");
 
 client
   .authenticate("gungerskunk")

@@ -1,44 +1,45 @@
+const Adapter = require("../Adapter");
 const { UDP } = require("../Connection/protocols");
 
-const mapResponseToChallenge = f => f
+const mapResponseToChallenge = (f) => f;
 
-module.exports = class GoldSrcAdapter extends Adapter {
-
-  constructor() {
+module.exports = class GoldSrcAdapter extends (
+  Adapter
+) {
+  constructor(...args) {
+    super(...args);
     this.challege = null;
-    this.password = null
+    this.password = null;
   }
 
   getProtocol() {
-    return UDP
+    return UDP;
   }
 
   getAuthMessage(password) {
-    this.password = password
-    return "challenge rcon"
+    this.password = password;
+    return "challenge rcon";
   }
 
   processAuthResponse(response) {
-    this.challenge = mapResponseToChallenge(response)
+    this.challenge = mapResponseToChallenge(response);
   }
 
   processMessage(message) {
-    if (message.startsWith("challenge"))  {
-      return message
+    if (message.startsWith("challenge")) {
+      return message;
+    } else if (this.challenge && this.password) {
+      return `rcon ${this.challenge} ${this.passworg} ${message}`;
     }
-    else if (this.challenge && this.password){
-      return `rcon ${this.challenge} ${this.passworg} ${message}`
-    } 
   }
 
   serialize(message) {
-    const processedMessage = processMessage(message)
+    const processedMessage = this.processMessage(message);
 
     return Buffer.concat([
-      Buffer.from([0xFF, 0xFF, 0xFF, 0xFF]),
+      Buffer.from([0xff, 0xff, 0xff, 0xff]),
       Buffer.from(processedMessage),
-      Buffer.from("\n")
-    ])
+      Buffer.from("\n"),
+    ]);
   }
-
-}
+};
