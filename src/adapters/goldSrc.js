@@ -22,6 +22,7 @@ module.exports = class GoldSrcAdapter extends (
   }
 
   processAuthResponse(response) {
+    console.log;
     this.challenge = mapResponseToChallenge(response);
   }
 
@@ -41,5 +42,9 @@ module.exports = class GoldSrcAdapter extends (
       Buffer.from(processedMessage),
       Buffer.from("\n"),
     ]);
+  }
+
+  parse(buffer) {
+    return buffer.toString().substr("\n");
   }
 };

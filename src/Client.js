@@ -101,7 +101,7 @@ module.exports = class Client {
 
   async authenticate(password) {
     await this.connect();
-    return this.exec(this.adapter.getAuthMessage(password));
+    const result = await this.exec(this.adapter.getAuthMessage(password));
   }
 
   async command(command) {
