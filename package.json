@@ -6,16 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "docker:build": "docker build -t rcon .",
-    "docker:run": "docker run -v $(pwd):/app -p 27015:27015 -it rcon bash -l"
+    "docker:run": "docker run -v $(pwd):/app -p 27015:27015 -it rcon bash -l",
+    "docker:bash": "docker exec rcon bash -l"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "micro": "^9.3.4",
-    "rcon": "^1.0.3",
     "uuid": "^8.3.2"
   },
-  "devDependencies": {
-    "micro-dev": "^3.0.0"
-  }
+  "devDependencies": {}
 }

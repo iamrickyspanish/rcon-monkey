@@ -55,7 +55,7 @@ module.exports = class RconConnection {
     this.on = this.emitter.on.bind(this);
     this.off = this.emitter.off.bind(this);
     this.once = this.emitter.once.bind(this);
-    this.removeListener = this.emitter.removeListener.bind(this)
+    this.removeListener = this.emitter.removeListener.bind(this);
     this.isReady = false;
     this.protocol = protocol;
     this.socket =
@@ -63,7 +63,6 @@ module.exports = class RconConnection {
         ? new net.Socket()
         : dgram.createSocket("udp4");
     this.sendFnName = mapProtocolToSendFnName(this.protocol);
-  
 
     this.socket.on(mapProtocolToConnectEventName(this.protocol), () => {
       this.isReady = true;

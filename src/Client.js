@@ -1,110 +1,123 @@
-const { v4: uuidv4 } = require("uuid");
+"use strict";
+
 const RconConnection = require("./Connection");
 
-// const pkgTypes = Object.freeze({
-//   AUTH: 3,
-//   COMMAND: 2,
+// const rejectOnTimeout = (reject, time = 3000) =>
+//   setTimeout(() => {
+//     reject(new Error("Timeout"));
+//   }, time);
+
+// const defaultOptions = Object.freeze({
+//   timoutMs: 3000
 // });
-
-// class Deferred {
-//   constructor() {
-//     this.resolve = null;
-//     this.reject = null;
-//     const promiseFn = (resolve, reject) => {
-//       this.resolve = resolve;
-//       this.reject = reject;
-//     };
-//     this.promise = new Promise(promiseFn.bind(this));
-//   }
-// }
-
-rejectOnTimeout = (reject, time = 3000) =>
-  setTimeout(() => {
-    reject(new Error("Timeout"));
-  }, time);
 
 module.exports = class Client {
   constructor(adapter, port, host) {
     const connection = new RconConnection(adapter.getProtocol());
-    // connection.on("receive", this.receive.bind(this));
     Object.assign(this, {
       adapter,
       port,
       host,
-      connection,
-      deferredPromises: {},
+      connection
     });
   }
 
-  send(message) {
-    // const _id = id || uuidv4();
+  async send(message) {
     const req = this.adapter.serialize(message);
     return new Promise((resolve, reject) => {
-      console.log("send before");
-      this.connection.send(req);
-      console.log("send after");
-      rejectOnTimeout(reject);
+      try {
+        this.connection.send(req);
+        const timeout = setTimeout(
+          () =>
+            this.timeout(reject, [
+              ["error", handleError],
+              ["receive", handleConnect]
+            ]),
+          3000
+        );
 
-      this.connection.once("error", (err) => {
-        reject(err);
-      });
+        const handleError = (err) => {
+          clearTimeout(timeout);
+          this.connection.removeListener("receive", handleReceive);
+          reject(err);
+        };
 
-      this.connection.once("receive", (res) => {
-        const result = this.adapter.parse(res);
-        resolve(result);
-      });
+        const handleReceive = (res) => {
+          clearTimeout(timeout);
+          const result = this.adapter.parse(res);
+          this.connection.removeListener("error", handleError);
+          resolve(result);
+        };
+
+        this.connection.once("receive", handleReceive);
+        this.connection.once("error", handleError);
+      } catch (e) {
+        console.error("shit", e);
+      }
     });
-
-    // const req = createRequest(type, _id, body);
-    // this.connection.send(req);
-    // const deferredPromise = new Deferred();
-    // this.deferredPromises[id] = deferredPromise;
-    // console.log("sent");
-    // return deferredPromise.promise;
   }
-
-  // receive(response) {
-  //   const res = readResponse(response);
-  //   console.log("res", res);
-  //   const deferredPromise = this.deferredPromises[res.id];
-  //   if (deferredPromise) {
-  //     deferredPromise.resolve(res);
-  //     delete this.deferredPromises[res.id];
-  //   }
-  // }
 
   async exec(message) {
     try {
-      console.log("exec");
       const res = await this.send(message);
       return res;
     } catch (err) {
-      console.error("Unknown error:", err);
+      console.error(err);
+    }
+  }
+
+  timeout(reject, obsoleteListeners) {
+    try {
+      if (Array.isArray(obsoleteListeners))
+        for (listenerTupel in obsoleteListeners) {
+          if (Array.isArray(listenerTupel)) {
+            this.connection.removeListener(...listenerTupel);
+          }
+        }
+      if (typeof reject !== "function") throw "invalid arguments";
+      reject(new Error("Timeout"));
+    } catch (err) {
+      throw `Error handling timeout ${err}`;
     }
   }
 
   async connect() {
-    return new Promise((resolve, reject) => {
-      rejectOnTimeout(reject);
-      this.connection.once("connect", () => {
-        resolve();
-      });
+    try {
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(
+          () =>
+            this.timeout(reject, [
+              ["error", handleError],
+              ["connect", handleConnect]
+            ]),
+          3000
+        );
 
-      this.connection.once("error", () => {
-        console.log("error");
-        reject();
+        const handleError = (err) => {
+          clearTimeout(timeout);
+          console.error("error", err);
+          this.connection.removeListener("connect", handleConnect);
+          reject(err);
+        };
+
+        const handleConnect = () => {
+          clearTimeout(timeout);
+          this.connection.removeListener("error", handleError);
+          resolve();
+        };
+
+        this.connection.once("error", handleError);
+        this.connection.once("connect", handleConnect);
+        this.connection.connect(this.port, this.host);
       });
-      console.log("connect");
-      this.connection.connect(this.port, this.host);
-    });
+    } catch (err) {
+      throw `Connect: ${err}`;
+    }
   }
 
   async authenticate(password) {
     await this.connect();
-    const result = await this.exec(this.adapter.getAuthMessage(password));
-  }
-
-  async command(command) {
-    return this.exec(pkgTypes.COMMAND, command);
+    const response = await this.exec(this.adapter.getAuthMessage(password));
+    this.adapter.processAuthResponse(response);
   }
 };

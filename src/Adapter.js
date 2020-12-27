@@ -9,8 +9,8 @@ module.exports = class Adapter {
     return password;
   }
 
-  processAuthResponse(response) {
-    console.log("response:", response);
+  processAuthResponse(message) {
+    console.log("auth message:", message);
   }
 
   serialize(message) {
