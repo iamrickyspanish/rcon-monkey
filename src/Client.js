@@ -18,7 +18,7 @@ module.exports = class Client {
       adapter,
       port,
       host,
-      connection,
+      connection
     });
   }
 
@@ -31,7 +31,7 @@ module.exports = class Client {
           () =>
             this.timeout(reject, [
               ["error", handleError],
-              ["receive", handleConnect],
+              ["receive", handleReceive]
             ]),
           3000
         );
@@ -88,7 +88,7 @@ module.exports = class Client {
           () =>
             this.timeout(reject, [
               ["error", handleError],
-              ["connect", handleConnect],
+              ["connect", handleConnect]
             ]),
           3000
         );
