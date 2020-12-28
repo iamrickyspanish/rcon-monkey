@@ -69,7 +69,7 @@ module.exports = class Client {
   timeout(reject, obsoleteListeners) {
     try {
       if (Array.isArray(obsoleteListeners))
-        for (listenerTupel in obsoleteListeners) {
+        for (const listenerTupel in obsoleteListeners) {
           if (Array.isArray(listenerTupel)) {
             this.connection.removeListener(...listenerTupel);
           }
