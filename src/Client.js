@@ -18,7 +18,7 @@ module.exports = class Client {
       adapter,
       port,
       host,
-      connection
+      connection,
     });
   }
 
@@ -31,7 +31,7 @@ module.exports = class Client {
           () =>
             this.timeout(reject, [
               ["error", handleError],
-              ["receive", handleConnect]
+              ["receive", handleConnect],
             ]),
           3000
         );
@@ -88,7 +88,7 @@ module.exports = class Client {
           () =>
             this.timeout(reject, [
               ["error", handleError],
-              ["connect", handleConnect]
+              ["connect", handleConnect],
             ]),
           3000
         );
@@ -119,5 +119,15 @@ module.exports = class Client {
     await this.connect();
     const response = await this.exec(this.adapter.getAuthMessage(password));
     this.adapter.processAuthResponse(response);
+  }
+
+  toJSON() {
+    return JSON.serialize(this);
+  }
+
+  static fromJSON(stringifiedInstance) {
+    const newInstance = new Client({});
+    Object.assign(newInstance, JSON.parse(stringifiedInstance));
+    return newInstance;
   }
 };
