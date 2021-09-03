@@ -26,9 +26,7 @@ const deconstructResponseBuffer = (buffer) => {
   ];
 };
 
-module.exports = class GoldSrcAdapter extends (
-  Adapter
-) {
+module.exports = class GoldSrcAdapter extends Adapter {
   constructor(...args) {
     super(...args);
     this.challege = null;
@@ -39,13 +37,15 @@ module.exports = class GoldSrcAdapter extends (
     return UDP;
   }
 
-  getAuthMessage(password) {
+  async authenticate(sendFn, password) {
+    const responseChallenge = await sendFn("challenge rcon");
+    this.challenge = mapMessageToChallenge(responseChallenge);
+    const responseEcho = await sendFn(
+      `rcon ${this.challege} ${password} echo rcon-monkey: Test`
+    );
     this.password = password;
-    return "challenge rcon";
-  }
-
-  processAuthResponse(response) {
-    this.challenge = mapMessageToChallenge(response);
+    console.log("!!!!!!", responseEcho);
+    return true;
   }
 
   prepareMessageForSend(message) {

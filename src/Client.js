@@ -116,9 +116,12 @@ module.exports = class Client {
   }
 
   async authenticate(password) {
-    await this.connect();
-    const response = await this.exec(this.adapter.getAuthMessage(password));
-    this.adapter.processAuthResponse(response);
+    try {
+      await this.connect();
+      await this.adapter.authenticate(this.exec.bind(this), password);
+    } catch (err) {
+      throw `Authentication: ${err}`;
+    }
   }
 
   toJSON() {

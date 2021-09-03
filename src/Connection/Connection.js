@@ -75,7 +75,7 @@ module.exports = class RconConnection {
     this.socket.on(mapProtocolToReceiveEventName(this.protocol), (...args) =>
       this.emit("receive", ...args)
     );
-    for (const event in delegatableEvents) {
+    for (const event of delegatableEvents) {
       this.socket.on(event, (...args) => {
         this.emit(event, ...args);
       });

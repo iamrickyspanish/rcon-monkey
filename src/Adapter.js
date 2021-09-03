@@ -5,13 +5,7 @@ module.exports = class Adapter {
     return TCP;
   }
 
-  getAuthMessage(password) {
-    return password;
-  }
-
-  processAuthResponse(message) {
-    console.log("auth message:", message);
-  }
+  async authenticate(sendFn, password) {}
 
   serialize(message) {
     return message;
