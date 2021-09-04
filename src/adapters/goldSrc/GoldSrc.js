@@ -41,11 +41,10 @@ module.exports = class GoldSrcAdapter extends Adapter {
     const responseChallenge = await sendFn("challenge rcon");
     this.challenge = mapMessageToChallenge(responseChallenge);
     const responseEcho = await sendFn(
-      `rcon ${this.challege} ${password} echo rcon-monkey: Test`
+      `rcon ${this.challenge} ${password} echo rcon-monkey: Test`
     );
     this.password = password;
-    console.log("!!!!!!", responseEcho);
-    return true;
+    if (responseEcho === "Bad challenge.\n") throw "bad challenge";
   }
 
   prepareMessageForSend(message) {
