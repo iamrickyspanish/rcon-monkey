@@ -44,8 +44,8 @@ module.exports = class GoldSrcAdapter extends Adapter {
       `rcon ${this.challenge} ${password} echo rcon-monkey: Test`
     );
     this.password = password;
-    console.log("responseEcho", responseEcho);
     if (
+      // responseEcho !== "rcon-monkey : Test \n"
       responseEcho === "Bad challenge.\n" ||
       responseEcho === "Bad rcon_password.\n"
     )
