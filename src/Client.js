@@ -77,7 +77,7 @@ module.exports = class Client {
       if (typeof reject !== "function") throw "invalid arguments";
       reject(new Error("Timeout"));
     } catch (err) {
-      throw `Error handling timeout ${err}`;
+      throw `timeout error`;
     }
   }
 
@@ -111,7 +111,7 @@ module.exports = class Client {
         this.connection.connect(this.port, this.host);
       });
     } catch (err) {
-      throw `Connect: ${err}`;
+      throw `connection error: ${err}`;
     }
   }
 
@@ -120,7 +120,7 @@ module.exports = class Client {
       await this.connect();
       await this.adapter.authenticate(this.exec.bind(this), password);
     } catch (err) {
-      throw `Authentication: ${err}`;
+      throw `authentication error: ${err}`;
     }
   }
 
